@@ -19,10 +19,6 @@
 *
 */
 
-//  CI 2.0 Compatibility
-if(!class_exists('CI_Model')) { class CI_Model extends Model {} }
-
-
 class Ion_auth_model extends CI_Model
 {
 	/**
@@ -63,11 +59,6 @@ class Ion_auth_model extends CI_Model
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->database();
-		$this->load->config('ion_auth', TRUE);
-		$this->load->helper('cookie');
-		$this->load->helper('date');
-		$this->load->library('session');
 
 		$this->tables  = $this->config->item('tables', 'ion_auth');
 		$this->columns = $this->config->item('columns', 'ion_auth');
@@ -617,7 +608,7 @@ class Ion_auth_model extends CI_Model
 	 * @return object Users
 	 * @author Ben Edmunds
 	 **/
-	public function get_users($group=false, $limit=NULL, $offset=NULL)
+	public function get_users($group = false)
 	{
 	    $this->db->select(array(
 				$this->tables['users'].'.*',
@@ -645,16 +636,10 @@ class Ion_auth_model extends CI_Model
 		$this->db->where_in($this->tables['groups'].'.name', $group);
 	    }
 
-		
 	    if (isset($this->ion_auth->_extra_where))
 	    {
 		$this->db->where($this->ion_auth->_extra_where);
 	    }
-
-
-		if (isset($limit) && isset($offset))
-			$this->db->limit($limit, $offset);
-		
 
 	    return $this->db->get($this->tables['users']);
 	}
@@ -891,7 +876,6 @@ class Ion_auth_model extends CI_Model
 	 **/
 	public function update_last_login($id)
 	{
-	    $this->load->helper('date');
 
 	    if (isset($this->ion_auth->_extra_where))
 	    {

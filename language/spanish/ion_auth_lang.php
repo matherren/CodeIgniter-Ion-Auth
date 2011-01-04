@@ -22,9 +22,9 @@ $lang['account_creation_duplicate_username'] = 'Nombre de usuario en uso o invá
 
 
 // Password
-$lang['password_change_successful'] 	 	 = 'Password cambiado con éxito';
+$lang['password_change_successful'] 	 	 = 'Contraseña cambiada con éxito, su nueva Contraseña se ha enviado a su correo eléctronico';
 $lang['password_change_unsuccessful'] 	  	 = 'No se ha podido cambiar el password';
-$lang['forgot_password_successful'] 	 	 = 'Nuevo password enviado por email';
+$lang['forgot_password_successful'] 	 	 = 'Se ha enviado un código de confirmación a su cuenta de correo eléctronico';
 $lang['forgot_password_unsuccessful'] 	 	 = 'No se ha podido crear un nuevo password';
 
 // Activation

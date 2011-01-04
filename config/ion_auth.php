@@ -20,19 +20,19 @@
 	/**
 	 * Tables.
 	 **/
-	$config['tables']['groups']  = 'groups';
+	$config['tables']['groups']  = 'users_groups';
 	$config['tables']['users']   = 'users';
-	$config['tables']['meta']    = 'meta';
+	$config['tables']['meta']    = 'users_meta';
 	
 	/**
 	 * Site Title, example.com
 	 */
-	$config['site_title']		   = "Example.com";
+	$config['site_title']		   = "Breezes";
 	
 	/**
 	 * Admin Email, admin@example.com
 	 */
-	$config['admin_email']		   = "admin@example.com";
+	$config['admin_email']		   = "matherren@yahoo.com";
 	
 	/**
 	 * Default group, use name
@@ -65,7 +65,7 @@
 	/**
 	 * Minimum Required Length of Password
 	 **/
-	$config['min_password_length'] = 8;
+	$config['min_password_length'] = 6;
 	
 	/**
 	 * Maximum Allowed Length of Password
@@ -85,17 +85,17 @@
 	/**
 	 * How long to remember the user (seconds)
 	 **/
-	$config['user_expire']         = 86500;
+	$config['user_expire']         = 86400*7;
 	
 	/**
 	 * Extend the users cookies everytime they auto-login
 	 **/
-	$config['user_extend_on_login'] = false;
+	$config['user_extend_on_login'] = true;
 /**
 * Type of email to send (HTML or text)
 * Default : html
 **/
-$config['email_type'] = 'html';
+$config['email_type'] = 'text';
 	
 	/**
 	 * Folder where email templates are stored.
@@ -154,5 +154,15 @@ $config['email_type'] = 'html';
 	 **/
 	$config['error_end_delimiter'] = '</p>';
 	
+	/**
+	 * Auth loggin actions
+	 **/
+	$config['login_uri'] = 'auth/login';
+	$config['admin_login_success_action'] = '/';
+	$config['user_login_success_action'] = '/';
+	$config['deny_with_message'] = TRUE;
+	$config['denied_page'] = '';
+	$config['denied_from_ext_location'] = '';
+
 /* End of file ion_auth.php */
 /* Location: ./system/application/config/ion_auth.php */

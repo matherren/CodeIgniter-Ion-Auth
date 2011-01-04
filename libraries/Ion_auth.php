@@ -86,12 +86,14 @@ class Ion_auth
 	public function __construct()
 	{
 		$this->ci =& get_instance();
+
+
+		$this->ci->lang->load('ion_auth');
 		$this->ci->load->config('ion_auth', TRUE);
 		$this->ci->load->library('email');
-		$this->ci->load->library('session');
-		$this->ci->lang->load('ion_auth');
 		$this->ci->load->model('ion_auth_model');
 		$this->ci->load->helper('cookie');
+		$this->ci->load->helper('date');
 
 		$this->messages = array();
 		$this->errors = array();
@@ -105,6 +107,8 @@ class Ion_auth
 		{
 			$this->ci->ion_auth_model->login_remembered_user();
 		}
+
+		log_message('debug','Ion_auth Class Initialized');
 	}
 
 	/**
@@ -464,9 +468,9 @@ class Ion_auth
 	 * @return object Users
 	 * @author Ben Edmunds
 	 **/
-	public function get_users($group_name=false, $limit=NULL, $offset=NULL)
+	public function get_users($group_name = false)
 	{
-		return $this->ci->ion_auth_model->get_users($group_name, $limit, $offset)->result();
+		return $this->ci->ion_auth_model->get_users($group_name)->result();
 	}
 
 	/**
@@ -475,9 +479,9 @@ class Ion_auth
 	 * @return array Users
 	 * @author Ben Edmunds
 	 **/
-	public function get_users_array($group_name=false, $limit=NULL, $offset=NULL)
+	public function get_users_array($group_name = false)
 	{
-		return $this->ci->ion_auth_model->get_users($group_name, $limit, $offset)->result_array();
+		return $this->ci->ion_auth_model->get_users($group_name)->result_array();
 	}
 
 	/**
@@ -750,4 +754,87 @@ class Ion_auth
 		return $_output;
 	}
 
+	/**
+	* Handles the case where the one who did the request
+	* doesn't have enough credentials
+	*
+	* if deny_with_flash_message == true in config file, displays a flash
+	* message and redirects to the referer page (or homepage if none)
+	*
+	* else displays the denied_page (see config file)
+	* -------------------------------
+	* EXAMPLE USAGE (in a controller)
+	* -------------------------------
+	*
+	* @param string the role of the one we are denying the access
+	*
+	* ADDED BY Henry Mata
+	*/
+	function authorize($group_name='members',$only=FALSE,$noredirect=FALSE)
+	{
+
+		// check who did the request and build role hierarchy
+		$whois = $this->ci->session->userdata('group');
+
+		// if we have a role stored in session for this user
+		if ($whois != '')
+		{
+			// let's see who did we reserve the area to
+			$user_group = $this->ci->ion_auth_model->get_group_by_name($whois);
+
+			// let's see who requested to access this area
+			$request_group = $this->ci->ion_auth_model->get_group_by_name($group_name);
+
+			// let's see if we decided to restrict access ONLY to a given category
+			if ($only)
+			{
+				if ($user_group->id == $request_group->id && $this->logged_in()) return $this->get_user();
+			} else {
+				if ($user_group->id <= $request_group->id && $this->logged_in()) return $this->get_user();
+			}
+		} elseif ($noredirect == TRUE) return;
+
+		if ($this->ci->config->item('deny_with_message','ion_auth'))
+		{
+			// if visitor is a GUEST
+			if ($whois == '')
+			{
+				// First, we have to store the requested page in order
+				// to serve it back to the visitor after a successful login.
+				$this->ci->session->set_flashdata('requested_page', $_SERVER['REQUEST_URI']);
+
+				// Then we redirect to the login form with a 'access denied'
+				// message. Maybe if the visitor can log in,
+				// he'll get some more permissions...
+				redirect($this->ci->config->item('login_uri','ion_auth'));
+			} else {
+				// visitor is a USER, if visitor came to this site with an http_referer
+				if (isset($_SERVER['HTTP_REFERER']))
+				{
+					$referer = $_SERVER['HTTP_REFERER'];
+					if (preg_match("|^".base_url()."|", $referer) == 0)
+					{
+						// if http_referer is from an external site,
+						// users are taken to the page defined in the config file
+						redirect($this->ci->config->item('denied_from_ext_location','ion_auth'));
+					} else {
+						// if we came from our website, just go to this page back
+						// but maybe we arrived here because of the
+						// 'redirect to requested page', so in order not to
+						$this->ci->session->keep_flashdata('requested_page');
+						redirect($_SERVER['HTTP_REFERER']);
+					}
+				} else {
+					// if visitor did not come to this site with an http_referer,
+					// redirect to the page defined in the config file too
+					redirect($this->ci->config->item('denied_from_ext_location','ion_auth'));
+				}
+			}
+		} else {
+			$page = $this->ci->config->item('denied_page','ion_auth');
+			// this is how we stop the execution
+			// echo $obj->load->view($page, $data, true);
+			show_error('User Unauthorized',401);
+		}
+	}
 }
